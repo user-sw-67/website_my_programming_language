@@ -1,0 +1,97 @@
+/* блок последних новостей на главной — три карточки разной формы, чтобы не
+   выглядело шаблонным списком: крупная featured + обычная с картинкой + чисто
+   текстовая с акцентной полосой */
+.home-news {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  align-items: stretch;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.home-news__featured {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: 0;
+  overflow: hidden;
+}
+
+.home-news__featured-cover {
+  height: 220px;
+  background-size: cover;
+  background-position: center;
+}
+
+.home-news__featured-body {
+  padding: 1.5rem;
+}
+
+/* правая колонка — обычный flex-столбец, а не вторая grid-строка: так
+   карточки занимают ровно свою естественную высоту и не растягиваются
+   искусственно (раньше из-за grid-row-stretch внутри карточки появлялись
+   большие пустые промежутки над/под картинкой и текстом) */
+.home-news__side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.home-news__card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.home-news__card-cover {
+  flex-shrink: 0;
+  width: 88px;
+  height: 88px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+}
+
+.home-news__card-cover.news-card__cover--placeholder .news-card__cover-hex {
+  width: 28px;
+  height: 28px;
+}
+
+.home-news__quote {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.home-news__quote p {
+  font-style: italic;
+}
+
+/* на молодом сайте новостей может быть меньше трёх — единственная карточка
+   занимает всю ширину блока, а не половину с пустотой справа */
+.home-news--solo {
+  grid-template-columns: 1fr;
+}
+
+.home-news--solo .home-news__featured {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: none;
+}
+
+.home-news--solo .home-news__featured-cover {
+  height: 100%;
+}
+
+@media (max-width: 800px) {
+  .home-news--solo .home-news__featured {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .home-news {
+    grid-template-columns: 1fr;
+  }
+}

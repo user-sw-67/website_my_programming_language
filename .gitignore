@@ -1,0 +1,23 @@
+/.claudeignore
+/CLAUDE.md
+/.claude
+/.gitignore
+/SETUP.md
+
+# единый файл конфигурации (секреты) — храним только .env.example
+/.env
+
+
+# frontend
+frontend/node_modules/
+frontend/dist/
+
+# backend
+backend/__pycache__/
+backend/**/__pycache__/
+backend/staticfiles/
+backend/*.sqlite3
+backend/venv/
+
+# misc
+.DS_Store

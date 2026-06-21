@@ -1,0 +1,146 @@
+.forum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.forum-card {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.forum-card__count {
+  text-align: center;
+  min-width: 48px;
+  flex-shrink: 0;
+}
+
+.forum-card__count-num {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.forum-card__count-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.forum-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.forum-card__tags {
+  margin-top: 0.4rem;
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.badge--solved {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.topic-detail {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.topic-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  margin-bottom: 1rem;
+}
+
+.topic-detail__back:hover {
+  color: var(--accent);
+}
+
+.topic-detail__meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.5rem 0 1.25rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.topic-detail__body {
+  line-height: 1.7;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.comment {
+  display: flex;
+  gap: 0.8rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.comment__avatar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #06231a;
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.comment__body {
+  flex: 1;
+}
+
+.comment__author {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.comment__text {
+  margin: 0.3rem 0 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.comment-form {
+  margin-top: 1.5rem;
+}
+
+/* --- адаптив: правила ниже намеренно в самом конце файла, см. предупреждение в CLAUDE.md
+   про порядок каскада (@media не имеет приоритета сам по себе) --- */
+@media (max-width: 640px) {
+  .forum-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  .forum-header .btn {
+    width: 100%;
+  }
+
+  .forum-card {
+    flex-wrap: wrap;
+  }
+
+  .forum-card__count {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+}

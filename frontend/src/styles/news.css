@@ -1,0 +1,530 @@
+.news-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.news-filters input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.news-filters__clear-tag {
+  cursor: pointer;
+  border: none;
+}
+
+/* теги могут быть неограниченным количеством — горизонтальный скролл
+   вместо переноса строк, отсортированы по популярности на JS-стороне
+   (см. NewsPage.jsx), самые частые в начале */
+.news-tag-cloud {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  /* overflow-x:auto автоматически делает overflow-y тоже auto (так работает
+     CSS), без верхнего паддинга hover-подъём тега обрезался бы сверху и
+     казалось бы, что его перекрывает поле поиска над контейнером */
+  /* справа запас побольше — иначе зона затухания маски (см. ниже) попадает
+     на сам последний тег, а не на пустое место после него */
+  padding: 0.4rem 1.5rem 0.4rem 0;
+  /* фиксированные пиксели, а не проценты — при проценте зона затухания
+     росла бы вместе с длиной списка тегов и срезала бы последний тег */
+  mask-image: linear-gradient(90deg, transparent, black 12px, black calc(100% - 12px), transparent);
+}
+
+.news-tag-cloud .badge {
+  cursor: pointer;
+  border: none;
+  flex-shrink: 0;
+  transition: transform 0.15s var(--ease);
+}
+
+.news-tag-cloud .badge:hover {
+  transform: translateY(-1px);
+}
+
+.news-tag-cloud .badge--active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* фиксированные 3 колонки (не auto-fill) — раскладка строится явными
+   координатами col/row в JS (см. LAYOUTS в NewsPage.jsx), поэтому номера
+   линий грида должны быть стабильны, а не "плыть" от ширины экрана; на
+   мобильном (см. конец файла) колонки сбрасываются в одну */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(190px, auto);
+  gap: 1.25rem;
+}
+
+.news-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* едва заметный фоновый узор на самих карточках — не украшение ради
+   украшения, а способ визуально различать типы плиток мозаики даже без
+   картинки; opacity держим минимальным, чтобы не мешать читаемости текста */
+.news-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  z-index: 0;
+}
+
+/* без этого все прямые дети карточки (текст, обложка, декоративные значки)
+   красились бы ПОСЛЕ абсолютно позиционированного ::before по правилам
+   stacking context (positioned descendants со stack level 0 рисуются позже
+   обычных in-flow потомков) — узор оказался бы поверх текста, а не под ним */
+.news-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.news-card--featured::before,
+.news-card--featured-quote::before {
+  background-image: radial-gradient(circle, var(--text-primary) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.news-card--wide::before,
+.news-card--wide-quote::before {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--text-primary) 0,
+    var(--text-primary) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+}
+
+.news-card--tall::before,
+.news-card--tall-quote::before {
+  background-image:
+    linear-gradient(60deg, var(--text-primary) 1px, transparent 1px),
+    linear-gradient(-60deg, var(--text-primary) 1px, transparent 1px);
+  background-size: 22px 38px;
+}
+
+.news-card--quote::before,
+.news-card--mini::before {
+  background-image:
+    linear-gradient(var(--text-primary) 1px, transparent 1px),
+    linear-gradient(90deg, var(--text-primary) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.news-card__cover {
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+}
+
+/* декоративная заглушка вместо картинки — шестиугольник на градиенте в
+   палитре сайта, а не пустое серое поле */
+.news-card__cover--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 30% 30%, var(--accent-soft), transparent 60%),
+    var(--bg-secondary);
+}
+
+.news-card__cover-hex {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  opacity: 0.55;
+}
+
+.news-card__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.news-card__meta {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.news-card__tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 0.6rem;
+}
+
+/* --- featured: широкая горизонтальная карточка на всю строку --- */
+.news-card--featured {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+}
+
+.news-card--featured .news-card__cover,
+.news-card--featured .news-card__cover--placeholder {
+  height: 100%;
+  min-height: 240px;
+}
+
+.news-card--featured .news-card__cover-hex {
+  width: 72px;
+  height: 72px;
+}
+
+/* --- featured-quote: крупный слот без картинки — большая текстовая
+   карточка на всю строку с декоративной "орбитой атома" в углу, чтобы
+   пустое от картинки место не выглядело недоработанным */
+.news-card--featured-quote {
+  grid-column: 1 / -1;
+  position: relative;
+  padding: 2rem;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.news-card__orbit {
+  position: absolute;
+  top: 50%;
+  right: 6%;
+  width: 160px;
+  height: 160px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.news-card__orbit-ring {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--accent-edge, var(--accent-soft));
+  border-radius: 50%;
+  transform: rotate(20deg) scaleY(0.55);
+}
+
+.news-card__orbit-ring--b {
+  inset: 22px;
+  transform: rotate(-25deg) scaleY(0.6);
+}
+
+.news-card__orbit-dot {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+@media (max-width: 700px) {
+  .news-card__orbit { display: none; }
+  .news-card--featured-quote h3,
+  .news-card--featured-quote p {
+    max-width: 100% !important;
+  }
+}
+
+/* --- wide: на 2 колонки, 1 строка — горизонтальная карточка с картинкой --- */
+.news-card--wide {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+}
+
+.news-card--wide .news-card__cover,
+.news-card--wide .news-card__cover--placeholder {
+  height: 100%;
+}
+
+/* --- wide-quote: те же 2 колонки, но без картинки — текст + дорожки платы
+   справа, чтобы широкий пустой текстовый блок не выглядел недоработанным --- */
+.news-card--wide-quote {
+  grid-column: span 2;
+  position: relative;
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.news-card__circuit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  padding-right: 1.5rem;
+  opacity: 0.5;
+}
+
+.news-card__circuit-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.news-card__circuit-dot:nth-child(2) { opacity: 0.6; }
+.news-card__circuit-dot:nth-child(3) { opacity: 0.35; }
+
+/* --- tall: 1 колонка, 2 строки — высокая карточка с крупной картинкой --- */
+.news-card--tall {
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-card__cover--tall {
+  height: 220px;
+}
+
+/* --- tall-quote: 1 колонка, 2 строки, без картинки — много воздуха для
+   текста + одинокий шестиугольник наверху вместо обложки --- */
+.news-card--tall-quote {
+  grid-row: span 2;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+}
+
+.news-card__cover-hex--lone {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  opacity: 0.6;
+}
+
+/* --- quote: чисто текстовая карточка, без картинки вообще --- */
+.news-card--quote {
+  padding: 1.25rem;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  justify-content: center;
+}
+
+.news-card__quote-text {
+  font-style: italic;
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+/* --- mini: горизонтальная компактная карточка с маленьким превью --- */
+.news-card--mini {
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.news-card__mini-cover {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+}
+
+.news-card__mini-cover.news-card__cover--placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+}
+
+.news-card__mini-cover .news-card__cover-hex {
+  width: 28px;
+  height: 28px;
+}
+
+@media (max-width: 700px) {
+  .news-card--featured {
+    grid-template-columns: 1fr;
+  }
+}
+
+.news-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.news-detail {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.news-detail__cover {
+  width: 100%;
+  height: 320px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 14px;
+  margin: 1rem 0 1.25rem;
+}
+
+.news-detail__cover.news-card__cover--placeholder .news-card__cover-hex {
+  width: 64px;
+  height: 64px;
+}
+
+.news-detail__meta {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.news-detail__body {
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: var(--text-primary);
+}
+
+/* --- блоки статьи (1-7, текст + опционально фото к каждому, см.
+   apps/news Block в форме создания) --- */
+.news-detail__blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.news-detail__block {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.news-detail__block--reverse {
+  flex-direction: row-reverse;
+}
+
+.news-detail__block-image {
+  flex: 0 0 42%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--corner);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 14px 28px -12px rgba(0, 0, 0, 0.45);
+}
+
+.news-detail__block-text {
+  flex: 1;
+  margin: 0;
+  line-height: 1.8;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+/* блок без фото — текстовая врезка с акцентной полосой, как home-news__quote,
+   а не очередной безликий абзац */
+.news-detail__block-quote {
+  margin: 0;
+  padding: 1.1rem 1.5rem;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 var(--corner) var(--corner) 0;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: var(--text-primary);
+}
+
+.news-detail__divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  opacity: 0.55;
+}
+
+.news-detail__divider::before,
+.news-detail__divider::after {
+  content: '';
+  flex: 1;
+  max-width: 140px;
+  height: 1px;
+  background: var(--border);
+}
+
+.news-detail__divider-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  animation: news-divider-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes news-divider-pulse {
+  0%, 100% { transform: scale(0.8); opacity: 0.55; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+@media (max-width: 700px) {
+  .news-detail__cover { height: 200px; }
+
+  .news-detail__block,
+  .news-detail__block--reverse {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .news-detail__block-image {
+    flex-basis: auto;
+  }
+}
+
+/* финальный адаптивный блок — намеренно в самом конце файла (см.
+   предупреждение про порядок каскада в index.css): на узком экране сетка
+   и так в одну колонку, поэтому widе/tall-спаны нужно явно сбросить, иначе
+   "span 2" остаётся занимать несуществующую вторую колонку */
+@media (max-width: 700px) {
+  .news-card--wide,
+  .news-card--wide-quote {
+    grid-column: span 1;
+  }
+
+  .news-card--wide {
+    grid-template-columns: 1fr;
+  }
+
+  .news-card--tall,
+  .news-card--tall-quote {
+    grid-row: span 1;
+  }
+
+  .news-card__circuit { display: none; }
+}

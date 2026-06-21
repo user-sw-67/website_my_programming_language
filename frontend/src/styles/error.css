@@ -1,0 +1,107 @@
+.error-page {
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.error-code {
+  font-size: 7rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+  text-shadow: var(--glow);
+  position: relative;
+}
+
+.error-code--glitch {
+  animation: glitch 2.4s infinite;
+}
+
+.error-code--glitch::before,
+.error-code--glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+}
+
+.error-code--glitch::before {
+  color: #f87171;
+  clip-path: polygon(0 2%, 100% 2%, 100% 40%, 0 40%);
+  transform: translate(-2px, -1px);
+  animation: glitch-shift 2.6s infinite;
+}
+
+.error-code--glitch::after {
+  color: #38bdf8;
+  clip-path: polygon(0 60%, 100% 60%, 100% 98%, 0 98%);
+  transform: translate(2px, 1px);
+  animation: glitch-shift 2.1s infinite reverse;
+}
+
+@keyframes glitch-shift {
+  0%, 90%, 100% { transform: translate(0, 0); opacity: 0; }
+  92% { transform: translate(-3px, 1px); opacity: 1; }
+  95% { transform: translate(3px, -1px); opacity: 1; }
+}
+
+@keyframes glitch {
+  0%, 96%, 100% { transform: translate(0, 0); }
+  97% { transform: translate(-1px, 1px); }
+  98% { transform: translate(1px, -1px); }
+}
+
+.error-particles span {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.5;
+  animation: drift 6s linear infinite;
+}
+
+@keyframes drift {
+  from { transform: translateY(0) scale(1); opacity: 0.6; }
+  to { transform: translateY(-220px) scale(0.3); opacity: 0; }
+}
+
+.error-title {
+  margin: 0.5rem 0;
+  font-size: 1.4rem;
+}
+
+.error-text {
+  color: var(--text-secondary);
+  max-width: 420px;
+}
+
+.error-icon {
+  font-size: 4.5rem;
+  animation: shake 2.5s ease-in-out infinite;
+  filter: drop-shadow(var(--glow));
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  4% { transform: rotate(-8deg); }
+  8% { transform: rotate(8deg); }
+  12% { transform: rotate(-4deg); }
+  16% { transform: rotate(0deg); }
+}
+
+.error-icon--pulse {
+  animation: signal-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes signal-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
