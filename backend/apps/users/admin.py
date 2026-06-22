@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import User
 
 UserAdmin.fieldsets = UserAdmin.fieldsets + (
-    ('ATOM', {'fields': ('role', 'developer_level', 'developer_key', 'avatar_url', 'bio')}),
+    ('ATOM', {'fields': ('role', 'developer_level', 'developer_key', 'display_name', 'avatar_url', 'github_url', 'bio')}),
 )
 UserAdmin.list_display = UserAdmin.list_display + ('role', 'developer_level', 'developer_key')
 UserAdmin.list_filter = UserAdmin.list_filter + ('role', 'developer_level')

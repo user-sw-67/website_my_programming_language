@@ -1,11 +1,20 @@
+import uuid
+
+from django.core.files.storage import default_storage
 from django.utils import timezone
-from rest_framework import viewsets
-from rest_framework.exceptions import Throttled
+from rest_framework import permissions, viewsets
+from rest_framework.exceptions import PermissionDenied, Throttled, ValidationError
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import NewsPost
 from .permissions import IsMiddlePlusOrReadOnly
 from .serializers import NewsPostSerializer
+
+ALLOWED_IMAGE_TYPES = {'image/png', 'image/jpeg', 'image/webp', 'image/gif'}
+MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 МБ — этого достаточно для фото к новости, не для видео/архивов
 
 # не чаще одной новости в 6 часов на автора — чтобы лента новостей не
 # захлёбывалась от одного слишком активного автора
@@ -37,8 +46,8 @@ class NewsPostViewSet(viewsets.ModelViewSet):
         if search:
             from django.db.models import Q
             qs = qs.filter(
-                Q(title__icontains=search)
-                | Q(summary__icontains=search) | Q(author__username__icontains=search),
+                Q(title__icontains=search) | Q(summary__icontains=search)
+                | Q(author__username__icontains=search) | Q(author__display_name__icontains=search),
             )
         # ?tags=a,b,c — новость подходит, если у неё есть хотя бы ОДИН из
         # выбранных тегов (OR, не пересечение); до 5 тегов одновременно
@@ -63,3 +72,29 @@ class NewsPostViewSet(viewsets.ModelViewSet):
         blocks = serializer.validated_data.get('blocks', [])
         body = '\n\n'.join(b.get('text', '').strip() for b in blocks).strip()
         serializer.save(author=self.request.user, is_published=True, published_at=timezone.now(), body=body)
+
+
+class ImageUploadView(APIView):
+    """Загрузка картинки файлом для блока новости/обложки — альтернатива вводу
+    готового URL (см. NewsTab.jsx). Доступно тем же ролям, что могут публиковать
+    новости (мидл+/admin); своего S3 нет — файл уходит на диск (MEDIA_ROOT)."""
+
+    permission_classes = (permissions.IsAuthenticated,)
+    parser_classes = (MultiPartParser,)
+
+    def post(self, request):
+        if not request.user.is_middle_plus:
+            raise PermissionDenied('Загружать изображения могут мидл-разработчики и выше.')
+
+        upload = request.FILES.get('image')
+        if upload is None:
+            raise ValidationError({'image': 'Файл не передан.'})
+        if upload.content_type not in ALLOWED_IMAGE_TYPES:
+            raise ValidationError({'image': 'Разрешены только PNG, JPEG, WebP и GIF.'})
+        if upload.size > MAX_IMAGE_BYTES:
+            raise ValidationError({'image': 'Файл больше 5 МБ.'})
+
+        ext = upload.name.rsplit('.', 1)[-1].lower() if '.' in upload.name else 'bin'
+        path = default_storage.save(f'news/{uuid.uuid4().hex}.{ext}', upload)
+        url = request.build_absolute_uri(default_storage.url(path))
+        return Response({'url': url}, status=201)

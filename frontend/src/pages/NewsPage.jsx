@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../api/client.js';
 import { useMediaQuery } from '../hooks/useMediaQuery.js';
+import { displayName } from '../utils/userDisplay.js';
 import '../styles/news.css';
 
 const DEMO_NEWS = [
@@ -137,7 +138,7 @@ function NewsCard({ post, variant, style }) {
   const meta = (
     <div className="news-card__meta">
       {new Date(post.published_at).toLocaleDateString('ru-RU')}
-      {post.author && <> · @{post.author.username}</>}
+      {post.author && <> · {displayName(post.author)}</>}
     </div>
   );
   const tags = (

@@ -1,0 +1,99 @@
+/* Стилизованная замена window.confirm()/window.alert() — см. FeedbackContext.jsx */
+
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: color-mix(in srgb, var(--bg-primary) 70%, transparent);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fade-in 0.15s ease both;
+}
+
+.confirm-modal {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  padding: 1.4rem;
+  animation: chat-pop 0.18s var(--ease) both;
+}
+
+.confirm-modal__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.confirm-modal__text {
+  margin: 0 0 1.1rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.confirm-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.toast-stack {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: min(360px, calc(100vw - 2rem));
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lift);
+  font-size: 0.86rem;
+  cursor: pointer;
+  animation: toast-in 0.2s var(--ease) both;
+}
+
+.toast__icon {
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.toast__text {
+  line-height: 1.4;
+}
+
+.toast--info { border-left: 3px solid var(--accent); }
+.toast--success { border-left: 3px solid var(--accent); }
+.toast--success .toast__icon { color: var(--accent); }
+.toast--info .toast__icon { color: var(--accent); }
+
+.toast--error {
+  border-left: 3px solid var(--danger);
+}
+
+.toast--error .toast__icon {
+  color: var(--danger);
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 480px) {
+  .toast-stack { top: 0.75rem; right: 0.75rem; left: 0.75rem; max-width: none; }
+}

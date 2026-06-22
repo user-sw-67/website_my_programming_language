@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
+import { displayName } from '../utils/userDisplay.js';
 
 const DEMO_REVIEWS = [
   { id: 'demo-1', author: { username: 'guest_dev' }, rating: 5, body: 'Понравилась идея gradual typing — удобно для прототипов и обучения.', developer_response: '', responded_by: null },
@@ -40,12 +41,12 @@ function ReviewCard({ review, canRespond, onResponded }) {
     <div className="card">
       <Stars value={review.rating} />
       <p style={{ color: 'var(--text-secondary)', margin: '0.6rem 0' }}>{review.body}</p>
-      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>@{review.author?.username || 'аноним'}</div>
+      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{review.author ? displayName(review.author) : 'аноним'}</div>
 
       {review.developer_response && (
         <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
           <div className="eyebrow" style={{ marginBottom: '0.3rem' }}>
-            ответ {review.responded_by?.username ? `@${review.responded_by.username}` : 'разработчика'}
+            ответ {review.responded_by ? displayName(review.responded_by) : 'разработчика'}
           </div>
           <p style={{ margin: 0, fontSize: '0.9rem' }}>{review.developer_response}</p>
         </div>

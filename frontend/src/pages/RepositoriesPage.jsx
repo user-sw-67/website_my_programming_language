@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '../api/client.js';
+import { displayName } from '../utils/userDisplay.js';
 
 const DEMO_REPOS = [
   { id: 'demo-1', name: 'atm-json', owner: { username: 'mercedessupov' }, description: 'Минимальный парсер JSON, написанный на ATOM как демонстрация работы со строками и массивами.' },
@@ -28,7 +29,7 @@ export default function RepositoriesPage() {
           <div key={r.id} className="card card--interactive">
             <h3 style={{ margin: '0 0 0.3rem', color: 'var(--accent)' }}>{r.name}</h3>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.6rem' }}>
-              @{r.owner?.username || 'аноним'}
+              {r.owner ? displayName(r.owner) : 'аноним'}
             </div>
             <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.92rem' }}>{r.description}</p>
           </div>

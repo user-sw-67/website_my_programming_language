@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import PublicUserSerializer
 
 from .models import Project, ProjectNode
 
@@ -34,7 +34,7 @@ class ProjectNodeSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    owner = UserSerializer(read_only=True)
+    owner = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = Project

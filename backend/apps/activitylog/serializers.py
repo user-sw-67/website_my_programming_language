@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import PublicUserSerializer
 
 from .models import ActivityLog
 
 
 class ActivityLogSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = ActivityLog

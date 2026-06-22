@@ -5,6 +5,7 @@ import Footer from './components/Footer.jsx';
 import HomePage from './pages/HomePage.jsx';
 import EditorPage from './pages/EditorPage.jsx';
 import DocsPage from './pages/DocsPage.jsx';
+import ApiPage from './pages/ApiPage.jsx';
 import LearnPage from './pages/LearnPage.jsx';
 import ForumPage from './pages/ForumPage.jsx';
 import ForumTopicPage from './pages/ForumTopicPage.jsx';
@@ -42,6 +43,8 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/editor" element={<EditorPage />} />
             <Route path="/docs" element={<DocsPage />} />
+            {/* не /api-... — vite.config.js проксирует любой путь с префиксом /api прямо в Django (минуя React Router) */}
+            <Route path="/rest-api" element={<ApiPage />} />
             <Route path="/learn" element={<LearnPage />} />
             <Route path="/forum" element={<ForumPage />} />
             <Route path="/forum/:id" element={<ForumTopicPage />} />

@@ -7,46 +7,64 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const loadMe = async () => {
+  // cancelledRef — опциональный: если передан, перед каждым setState
+  // проверяем, не "отменён" ли уже этот конкретный вызов (см. эффект ниже,
+  // зачем это нужно). Вызовы извне (refresh() из контекста, login() без
+  // второго аргумента) просто не передают cancelledRef и работают как раньше.
+  const loadMe = async (cancelledRef) => {
     const token = localStorage.getItem('atm-access-token');
     if (!token) {
-      setUser(null);
-      setLoading(false);
+      if (!cancelledRef?.current) {
+        setUser(null);
+        setLoading(false);
+      }
       return;
     }
     try {
       const { data } = await apiClient.get('/auth/me/');
-      setUser(data);
+      if (!cancelledRef?.current) setUser(data);
     } catch {
       localStorage.removeItem('atm-access-token');
       localStorage.removeItem('atm-refresh-token');
-      setUser(null);
+      if (!cancelledRef?.current) setUser(null);
     } finally {
-      setLoading(false);
+      if (!cancelledRef?.current) setLoading(false);
     }
   };
 
-  const login = ({ access, refresh }) => {
+  const login = ({ access, refresh }, cancelledRef) => {
     localStorage.setItem('atm-access-token', access);
     localStorage.setItem('atm-refresh-token', refresh);
-    loadMe();
+    loadMe(cancelledRef);
   };
 
   useEffect(() => {
-    // после OAuth-редиректа (GitHub/Google) backend подставляет токены
-    // в query-параметры — подхватываем их один раз и чистим адресную строку
+    // React.StrictMode (см. main.jsx) в dev-режиме намеренно вызывает каждый
+    // эффект дважды подряд при монтировании (mount → cleanup → mount), чтобы
+    // отловить эффекты без идемпотентной очистки. Без cancelledRef оба
+    // прогона реально стартовали бы собственный запрос к /auth/me/, и в
+    // зависимости от того, какой из двух ответов сети пришёл позже, user
+    // мог измениться ДВАЖДЫ с разными ссылками на объект — это ломало логику
+    // эффектов, зависящих от user (например, анимацию входа в Header.jsx,
+    // которая иногда "зависала" из-за этой гонки). cancelledRef помечает
+    // первый (отменённый) прогон, чтобы его запрос, даже когда ответит,
+    // не трогал состояние — реальным остаётся только второй прогон.
+    const cancelledRef = { current: false };
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const refresh = params.get('refresh');
     if (token && refresh) {
-      login({ access: token, refresh });
+      // после OAuth-редиректа (GitHub/Google) backend подставляет токены
+      // в query-параметры — подхватываем их один раз и чистим адресную строку
+      login({ access: token, refresh }, cancelledRef);
       params.delete('token');
       params.delete('refresh');
       const rest = params.toString();
       window.history.replaceState({}, '', window.location.pathname + (rest ? `?${rest}` : ''));
     } else {
-      loadMe();
+      loadMe(cancelledRef);
     }
+    return () => { cancelledRef.current = true; };
   }, []);
 
   const logout = () => {

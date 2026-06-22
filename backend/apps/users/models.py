@@ -27,7 +27,15 @@ class User(AbstractUser):
     # DeveloperViewSet); генерируется автоматически при первом сохранении с
     # role=DEVELOPER/ADMIN, у обычных участников остаётся null
     developer_key = models.CharField(max_length=12, unique=True, null=True, blank=True, db_index=True)
+    # отображаемое имя — то, что видят остальные везде на сайте (форум, новости,
+    # чат, каталог разработчиков); username остаётся уникальным логином для
+    # входа и для поиска по нему (в т.ч. "повысить по логину" у сеньоров), но
+    # сам по себе нигде не показывается как основная подпись пользователя.
+    # Если display_name не задано — везде на фронте используется username
+    # как фоллбэк (см. helpers.js::displayName на фронтенде)
+    display_name = models.CharField(max_length=80, blank=True)
     avatar_url = models.URLField(blank=True)
+    github_url = models.URLField(blank=True)
     bio = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

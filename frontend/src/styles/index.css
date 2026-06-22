@@ -142,27 +142,10 @@ a {
   66% { transform: translate(-3%, -4%) scale(0.95); }
 }
 
-/* --- header --- */
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.85rem 1.75rem;
-  background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(10px);
-}
-
-.header__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  flex-shrink: 0;
-}
+/* --- header ---
+   Основной вид/раскладка шапки (титлбар-точки, REPL-навигация, голографический
+   блик, выпадающие меню «Изучить»/«Сообщество») — в styles/header.css; здесь
+   остались только элементы, общие с выезжающим мобильным меню. */
 
 .header__burger {
   display: none;
@@ -192,15 +175,6 @@ a {
 .header__burger.is-open span:nth-child(2) { opacity: 0; }
 .header__burger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-.header__logo {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
 .header__logo-mark {
   display: inline-block;
   width: 22px;
@@ -213,50 +187,6 @@ a {
 
 @keyframes spin-slow {
   to { transform: rotate(360deg); }
-}
-
-.header__logo-text {
-  background: linear-gradient(120deg, var(--accent), var(--text-primary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.header__nav {
-  display: flex;
-  gap: 1.4rem;
-  flex-wrap: wrap;
-}
-
-.header__nav a {
-  position: relative;
-  color: var(--text-secondary);
-  font-size: 0.92rem;
-  padding-bottom: 0.3rem;
-  transition: color 0.2s var(--ease);
-}
-
-.header__nav a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 0;
-  height: 2px;
-  background: var(--accent);
-  border-radius: 2px;
-  transition: width 0.3s var(--ease);
-}
-
-.header__nav a.active,
-.header__nav a:hover {
-  color: var(--text-primary);
-}
-
-.header__nav a.active::after,
-.header__nav a:hover::after {
-  width: 100%;
-  box-shadow: var(--glow);
 }
 
 .theme-toggle {
@@ -431,6 +361,17 @@ a {
   background: transparent;
   border-color: var(--border);
   color: var(--text-primary);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger), color-mix(in srgb, var(--danger) 80%, black));
+  color: #fff;
+  box-shadow: 0 10px 22px -8px color-mix(in srgb, var(--danger) 55%, transparent);
+}
+
+.btn-danger:hover {
+  box-shadow: 0 14px 28px -8px color-mix(in srgb, var(--danger) 70%, transparent);
+  transform: translateY(-2px);
 }
 
 .btn-secondary:hover {
@@ -698,23 +639,12 @@ input[type='checkbox']:checked::after {
    =========================================================================== */
 
 @media (max-width: 880px) {
-  .header { padding: 0.75rem 1.1rem; }
-  .header__nav { display: none; }
+  /* .header__nav/.header__user/.header__cta скрываются на мобильном уже
+     внутри styles/header.css (там же объявлены их безусловные правила) —
+     не дублируем здесь: порядок CSS между разными файлами при равной
+     специфичности не гарантирован, см. предупреждение выше */
   .header__burger { display: flex; }
   .main-content { padding: 1.75rem 1rem; }
-  /* «Выйти» в самой шапке здесь больше не помещается аккуратно — переехало
-     в выезжающее меню (.mobile-drawer__logout), см. Header.jsx */
-  .header__logout { display: none; }
-  /* переключатель темы тоже переехал в меню (.mobile-drawer__theme) —
-     в самой шапке рядом с аватаром и гамбургером ему не хватало места */
-  .header__theme-toggle { display: none; }
-}
-
-@media (max-width: 420px) {
-  .profile-chip__name { display: none; }
-  /* без имени правый паддинг под текст (0.9rem) остаётся лишним и
-     шестиугольник аватара съезжает влево от центра пилюли — выравниваем */
-  .profile-chip__btn { padding: 0.3rem; }
 }
 
 @media (max-width: 880px) {
@@ -967,9 +897,11 @@ h1 {
 /* --- копирование текста только в содержательных местах --- */
 .header__logo,
 .header__nav,
+.header__user,
+.header__cta,
+.theme-switch,
 .mobile-drawer,
 .btn,
-.auth-trigger,
 .theme-toggle,
 .header__burger,
 .badge,
@@ -1117,32 +1049,6 @@ h1, h2, h3, h4,
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.mobile-drawer__logout {
-  display: block;
-  width: 100%;
-  margin-top: 0.75rem;
-  padding: 0.85rem 1rem;
-  border: none;
-  border-top: 1px solid var(--border);
-  border-radius: 0;
-  background: transparent;
-  /* приглушённый красный, а не чистый var(--danger) — сильно бросался в
-     глаза просто как пункт меню, не как предупреждение об ошибке */
-  color: color-mix(in srgb, var(--danger) 55%, var(--text-secondary));
-  font-size: 1rem;
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-  opacity: 0;
-  transform: translateX(14px);
-  animation: drawer-link-in 0.35s var(--ease) both;
-}
-
-.mobile-drawer__logout:hover {
-  color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 .mobile-drawer__theme {

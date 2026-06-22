@@ -69,7 +69,7 @@ export default function AuthModal({ open, onClose }) {
 
         <form onSubmit={submit}>
           <div className="auth-field">
-            <label>Имя пользователя</label>
+            <label>Логин</label>
             <input type="text" value={form.username} onChange={update('username')} required />
           </div>
           {tab === 'register' && (

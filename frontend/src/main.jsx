@@ -4,15 +4,18 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import { ThemeProvider } from './theme/ThemeContext.jsx';
 import { AuthProvider } from './auth/AuthContext.jsx';
+import { FeedbackProvider } from './ui/FeedbackContext.jsx';
 import './styles/index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <FeedbackProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </FeedbackProvider>
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>,

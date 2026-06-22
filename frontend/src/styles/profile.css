@@ -14,23 +14,31 @@
 }
 
 .profile-card__avatar {
-  width: 84px;
-  height: 84px;
-  margin: 0 auto 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #06231a;
-  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  margin: 0 auto 0.4rem;
   box-shadow: var(--glow);
 }
 
-.profile-card__role {
-  display: inline-block;
-  margin-top: 0.5rem;
+.profile-card__github {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color 0.15s var(--ease);
+}
+
+.profile-card__github:hover {
+  color: var(--accent);
+}
+
+.profile-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
 }
 
 .profile-card__key {
@@ -39,6 +47,26 @@
   font-size: 0.78rem;
   color: var(--text-secondary);
   letter-spacing: 0.02em;
+}
+
+.profile-card__logout {
+  display: block;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.55rem 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.profile-card__logout:hover {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 .profile-section {

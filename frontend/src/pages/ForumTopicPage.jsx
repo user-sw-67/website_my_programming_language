@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import apiClient from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
+import Avatar from '../components/Avatar.jsx';
+import { displayName } from '../utils/userDisplay.js';
 import '../styles/forum.css';
 
 const DEMO_DETAIL = {
@@ -62,7 +64,7 @@ export default function ForumTopicPage() {
       <div className="card">
         <h1 style={{ marginTop: 0 }}>{topic.title}</h1>
         <div className="topic-detail__meta">
-          <span>@{topic.author?.username || 'неизвестный автор'}</span>
+          <span>{topic.author ? displayName(topic.author) : 'неизвестный автор'}</span>
           {(topic.tags || []).map((tag) => <span key={tag} className="badge">#{tag}</span>)}
         </div>
         <p className="topic-detail__body">{topic.body}</p>
@@ -75,9 +77,9 @@ export default function ForumTopicPage() {
         )}
         {(topic.comments || []).map((c) => (
           <div key={c.id} className="comment">
-            <span className="comment__avatar">{(c.author?.username || '?').slice(0, 1).toUpperCase()}</span>
+            <Avatar user={c.author} size={34} />
             <div className="comment__body">
-              <div className="comment__author">@{c.author?.username || 'аноним'}</div>
+              <div className="comment__author">{c.author ? displayName(c.author) : 'аноним'}</div>
               <p className="comment__text">{c.body}</p>
             </div>
           </div>

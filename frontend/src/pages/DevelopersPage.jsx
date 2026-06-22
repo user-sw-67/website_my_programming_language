@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '../api/client.js';
+import Avatar from '../components/Avatar.jsx';
+import { displayName } from '../utils/userDisplay.js';
 
 const LEVEL_LABEL = { junior: 'Junior', middle: 'Middle', senior: 'Senior' };
 
@@ -41,11 +43,9 @@ export default function DevelopersPage() {
         {developers && developers.map((d) => (
           <div key={d.id} className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.6rem' }}>
-              <span className="profile-chip__avatar" style={{ width: 36, height: 36, fontSize: '1rem' }}>
-                {d.username.slice(0, 1).toUpperCase()}
-              </span>
+              <Avatar user={d} size={36} />
               <div>
-                <strong>{d.username}</strong>
+                <strong>{displayName(d)}</strong>
                 {d.developer_level && (
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                     {LEVEL_LABEL[d.developer_level]}
@@ -54,8 +54,15 @@ export default function DevelopersPage() {
               </div>
             </div>
             {d.bio && <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: '0 0 0.6rem' }}>{d.bio}</p>}
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              {d.developer_key}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                {d.developer_key}
+              </span>
+              {d.github_url && (
+                <a href={d.github_url} target="_blank" rel="noreferrer" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                  🐙 GitHub
+                </a>
+              )}
             </div>
           </div>
         ))}

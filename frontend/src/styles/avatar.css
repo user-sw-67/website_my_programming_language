@@ -1,0 +1,28 @@
+/* Единая аватарка-шестиугольник, см. components/Avatar.jsx */
+
+.avatar-hex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  color: #06231a;
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  overflow: hidden;
+  user-select: none;
+  line-height: 1;
+  /* форсируем отдельный GPU-слой — на некоторых браузерах/видеокартах
+     clip-path-полигон на градиентном фоне без этого рендерится с
+     "рваными" краями или вовсе не появляется до первого репейнта */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.avatar-hex img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

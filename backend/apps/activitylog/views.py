@@ -7,6 +7,7 @@ from apps.forum.models import Topic
 from apps.issues.models import Issue
 from apps.news.models import NewsPost
 from apps.projects.models import Project
+from apps.support_chat.models import ChatSession
 from apps.users.models import User
 
 from .models import ActivityLog
@@ -51,4 +52,7 @@ class StatsView(APIView):
             'issues_open': Issue.objects.filter(status=Issue.Status.OPEN).count(),
             'issues_total': Issue.objects.count(),
             'projects_total': Project.objects.count(),
+            'support_sessions_active': ChatSession.objects.exclude(status=ChatSession.Status.CLOSED).count(),
+            'support_sessions_waiting': ChatSession.objects.filter(status=ChatSession.Status.WAITING_DEVELOPER).count(),
+            'support_sessions_closed': ChatSession.objects.filter(status=ChatSession.Status.CLOSED).count(),
         })

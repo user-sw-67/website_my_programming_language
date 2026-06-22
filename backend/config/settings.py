@@ -185,4 +185,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# своего S3/CDN пока нет — картинки новостей (см. apps/news/views.py::ImageUploadView)
+# лежат на диске рядом с кодом, том ./backend:/app в docker-compose.yml уже их
+# сохраняет между перезапусками контейнера
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

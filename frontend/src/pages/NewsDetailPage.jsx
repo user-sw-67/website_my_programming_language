@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import apiClient from '../api/client.js';
+import { displayName } from '../utils/userDisplay.js';
 import '../styles/news.css';
 
 // маленький декоративный разделитель между блоками статьи — не несёт
@@ -71,7 +72,7 @@ export default function NewsDetailPage() {
 
       <div className="news-detail__meta">
         {new Date(post.published_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
-        {post.author && <> · @{post.author.username}</>}
+        {post.author && <> · {displayName(post.author)}</>}
       </div>
 
       <h1 style={{ marginTop: '0.3rem' }}>{post.title}</h1>

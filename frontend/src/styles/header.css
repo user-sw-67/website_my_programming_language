@@ -1,0 +1,349 @@
+/* ===========================================================================
+   Шапка-«голотерминал» — выбрана и согласована в лаборатории хедеров
+   (/header-lab, вариант 11 «Голотерминал», микс «Стеклянного терминала» и
+   «Голографического REPL»). В отличие от лабораторной демки это не
+   плавающая карточка с отступами, а полноширинный sticky-бар — тот же набор
+   приёмов (титлбар с точками, REPL-навигация, голографический блик,
+   скользящий терминальный курсор), но без отдельной рамки/скруглений.
+   =========================================================================== */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  --mx: 50%;
+  --sheen-opacity: 0;
+  background: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header__sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    280px circle at var(--mx) 0%,
+    color-mix(in srgb, #a78bfa 40%, transparent),
+    color-mix(in srgb, var(--accent) 30%, transparent) 45%,
+    transparent 75%
+  );
+  /* видна только пока курсор реально над шапкой — переменную выставляет
+     Header.jsx по mousemove на window (см. там же, почему не просто
+     onMouseEnter/Leave на самой шапке: иначе блик дёргался бы при заходе) */
+  opacity: calc(var(--sheen-opacity) * 0.45);
+  transition: opacity 0.25s var(--ease);
+}
+
+.header__titlebar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.header__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.header__dot--a { background: var(--danger); }
+.header__dot--b { background: #f59e0b; }
+.header__dot--c { background: var(--accent); }
+
+.header__titlebar-name {
+  flex: 1;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-right: 27px;
+}
+
+.header__row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  /* высота фиксированная (а не min-height) и рассчитана на самый высокий
+     вариант контента — пилюлю профиля с 26px-аватаркой (~41px по факту) —
+     остальные состояния (анонимная навигация, анимация входа/выхода)
+     заметно ниже и просто центрируются внутри той же высоты, без "прыжка"
+     шапки между ними (баг, реально воспроизводился: разница доходила до 9px) */
+  height: 64px;
+  padding: 0 1.75rem;
+  box-sizing: border-box;
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.header__logo-caret {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-left: 0.3rem;
+  background: var(--accent);
+  animation: header-blink 1s steps(1) infinite;
+}
+
+@keyframes header-blink { 50% { opacity: 0; } }
+
+.header__nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.header__cursor {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 0;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 10px var(--accent-edge);
+  transition: transform 0.28s var(--ease), width 0.28s var(--ease), opacity 0.2s var(--ease);
+  pointer-events: none;
+}
+
+.header__navlink {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0.45rem 0.7rem;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.header__navlink-prompt {
+  color: var(--accent);
+  margin-right: 0.3rem;
+  opacity: 0.8;
+}
+
+.header__navlink:hover,
+.header__navlink.active {
+  color: var(--text-primary);
+}
+
+.header__navgroup {
+  position: relative;
+}
+
+.header__group-caret {
+  margin-left: 0.3rem;
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  transition: transform 0.2s var(--ease);
+}
+
+.header__group-caret.is-open {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+.header__dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 10;
+  min-width: 190px;
+  padding: 0.35rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-lift);
+  animation: header-dropdown-in 0.18s var(--ease) both;
+}
+
+@keyframes header-dropdown-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header__dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.header__dropdown-item:hover {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.header__dropdown-item.active {
+  color: var(--accent);
+}
+
+.header__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-shrink: 0;
+}
+
+.header__termfx {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* кнопка входа — намеренно сдержанная: тихий контур, подсвечивается
+   акцентом только на hover, без кричащего градиента */
+.header__cta {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.header__cta:hover {
+  border-color: var(--accent-edge);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* кнопка профиля — терминальный промпт «user@имя▮» крупнее обычных пунктов
+   меню (запрошено явно: побольше и "с идеей терминала") */
+.header__user {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.4rem 1.05rem 0.4rem 0.35rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.header__user:hover {
+  border-color: var(--accent-edge);
+  background: var(--accent-soft);
+  box-shadow: 0 0 16px -6px var(--accent-edge);
+}
+
+.header__user-prompt {
+  color: var(--accent);
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.header__user-caret {
+  display: inline-block;
+  width: 6px;
+  height: 1em;
+  margin-left: 0.1rem;
+  background: var(--accent);
+  vertical-align: middle;
+  animation: header-blink 1s steps(1) infinite;
+}
+
+/* переключатель темы — ползунок с двумя иконками вместо текстовой кнопки */
+.theme-switch {
+  position: relative;
+  width: 50px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.theme-switch__icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.theme-switch__icon--sun { left: 6px; }
+.theme-switch__icon--moon { right: 6px; }
+
+.theme-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  box-shadow: var(--glow);
+  transition: transform 0.3s var(--ease-snap);
+}
+
+.theme-switch__thumb--light { transform: translateX(0); }
+.theme-switch__thumb--dark { transform: translateX(24px); }
+
+/* ===========================================================================
+   АДАПТИВНОСТЬ — держать в конце файла.
+   =========================================================================== */
+
+@media (max-width: 880px) {
+  .header__titlebar { padding: 0.35rem 1.1rem; }
+  .header__row { padding: 0 1.1rem; }
+  .header__nav { display: none; }
+  .header__user, .header__cta { display: none; }
+  /* .header__burger переключается уже существующим адаптивным блоком в
+     index.css — не дублируем здесь, чтобы не зависеть от порядка между
+     файлами при равной специфичности (см. предупреждение в CLAUDE.md) */
+}

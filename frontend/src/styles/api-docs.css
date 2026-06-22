@@ -1,0 +1,409 @@
+.api-docs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.api-docs__hero {
+  padding: 1.75rem 0 0.5rem;
+}
+
+.api-docs__hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+  flex-wrap: wrap;
+}
+
+/* внешние ссылки (Swagger / OpenAPI-схема) — та же "астероидная" кнопка, что
+   и везде на сайте, но приглушённая (.btn-secondary), чтобы не спорить
+   взглядом с акцентными CTA на странице; иконка слегка взлетает на hover,
+   тот же приём, что у .btn-github__icon на главной */
+.api-docs__ext-btn-icon {
+  flex-shrink: 0;
+  transition: transform 0.3s var(--ease);
+}
+
+.api-docs__ext-btn:hover .api-docs__ext-btn-icon {
+  transform: translateY(-2px);
+}
+
+/* боковой переключатель категорий + панель — тот же паттерн, что docs-grid
+   в DocsPage.jsx (одна активная категория видна за раз, не лента из всех) */
+.api-docs__layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.api-docs__layout > * {
+  min-width: 0;
+}
+
+.api-docs__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  position: sticky;
+  top: 0.75rem;
+}
+
+.api-docs__nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+.api-docs__nav-item:hover {
+  color: var(--text-primary);
+}
+
+.api-docs__nav-item.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.api-docs__nav-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
+.api-docs__panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--corner);
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.api-docs__panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.api-docs__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.api-docs__search {
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+}
+
+.api-docs__search:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.api-docs__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.api-docs__chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.76rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), color 0.15s var(--ease), background 0.15s var(--ease);
+  user-select: none;
+}
+
+.api-docs__chip:hover {
+  border-color: var(--accent-edge);
+  color: var(--text-primary);
+}
+
+.api-docs__chip.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent-edge);
+  color: var(--accent);
+}
+
+/* активный чип метода подсвечивается его собственным цветом, а не общим
+   акцентом — так фильтр "GET" сразу читается как тот же синий, что бейджи
+   в списке ниже, а не как обычный выбранный таб */
+.api-docs__chip--get.is-active { background: rgba(56, 189, 248, 0.14); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; }
+.api-docs__chip--post.is-active { background: var(--accent-soft); border-color: var(--accent-edge); color: var(--accent); }
+.api-docs__chip--patch.is-active { background: rgba(251, 191, 36, 0.14); border-color: rgba(251, 191, 36, 0.4); color: var(--warning); }
+.api-docs__chip--delete.is-active { background: rgba(248, 113, 113, 0.14); border-color: rgba(248, 113, 113, 0.4); color: var(--danger); }
+.api-docs__chip--ws.is-active { background: rgba(167, 139, 250, 0.14); border-color: rgba(167, 139, 250, 0.4); color: #a78bfa; }
+
+.api-docs__base {
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.api-docs__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.api-docs__row {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  transition: border-color 0.15s var(--ease);
+  overflow: hidden;
+}
+
+.api-docs__row:hover,
+.api-docs__row.is-open {
+  border-color: var(--accent-edge);
+}
+
+.api-docs__row-head-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.85rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.api-docs__row-caret {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  transition: transform 0.2s var(--ease);
+}
+
+.api-docs__row-caret.is-open {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+.api-docs__row-details {
+  padding: 0 1rem 1.1rem 1rem;
+  border-top: 1px solid var(--border);
+  margin: 0 0.85rem 0.85rem;
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.api-docs__detail-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 0.45rem;
+}
+
+.api-docs__inline-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.api-docs__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.api-docs__table th {
+  text-align: left;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.3rem 0.6rem 0.4rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.api-docs__table td {
+  padding: 0.45rem 0.6rem 0.45rem 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  vertical-align: top;
+}
+
+.api-docs__table tr:last-child td {
+  border-bottom: none;
+}
+
+.api-docs__table code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--accent);
+}
+
+.api-docs__type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.api-docs__required {
+  color: var(--danger);
+  margin-left: 0.15rem;
+}
+
+.api-docs__required-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+}
+
+.api-docs__status-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--danger);
+}
+
+.api-docs__method {
+  flex-shrink: 0;
+  width: 64px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border-radius: 6px;
+}
+
+.api-docs__method--get { background: rgba(56, 189, 248, 0.14); color: #38bdf8; }
+.api-docs__method--post { background: var(--accent-soft); color: var(--accent); }
+.api-docs__method--patch { background: rgba(251, 191, 36, 0.14); color: var(--warning); }
+.api-docs__method--delete { background: rgba(248, 113, 113, 0.14); color: var(--danger); }
+.api-docs__method--ws { background: rgba(167, 139, 250, 0.14); color: #a78bfa; }
+
+.api-docs__row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.api-docs__row-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+
+.api-docs__path {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.api-docs__auth {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.5rem;
+}
+
+.api-docs__auth--public { background: var(--accent-soft); color: var(--accent); }
+.api-docs__auth--auth { background: rgba(56, 189, 248, 0.14); color: #38bdf8; }
+.api-docs__auth--dev { background: rgba(251, 191, 36, 0.14); color: var(--warning); }
+
+.api-docs__row-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+  font-size: 0.92rem;
+}
+
+.api-docs__row-desc {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 700px) {
+  .api-docs__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .api-docs__nav {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.4rem;
+  }
+
+  .api-docs__nav-item {
+    width: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .api-docs__panel {
+    padding: 1rem;
+  }
+
+  .api-docs__row-head-btn {
+    flex-direction: column;
+  }
+
+  .api-docs__method {
+    width: fit-content;
+    padding: 0 0.6rem;
+  }
+
+  .api-docs__table {
+    font-size: 0.78rem;
+  }
+
+  .api-docs__panel-head {
+    flex-direction: column;
+  }
+}

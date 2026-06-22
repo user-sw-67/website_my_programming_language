@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import PublicUserSerializer
 
 from .models import Comment, Topic
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
+    author = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = Comment
@@ -15,7 +15,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class TopicSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
+    author = PublicUserSerializer(read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:

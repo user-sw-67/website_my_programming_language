@@ -1,0 +1,62 @@
+/* Анимации входа/выхода из аккаунта, играющие внутри шапки-терминала
+   (Header.jsx) — перенесены и адаптированы из лаборатории хедеров
+   (см. TerminalFx.jsx). Одна строка в любой момент времени (предыдущая
+   размонтируется, новая монтируется на её месте через смену React key) —
+   так высота шапки никогда не скачет, в отличие от первой версии, где
+   строки складывались стеком и временно раздували .header__row. */
+
+.anim-line-fx {
+  display: flex;
+  align-items: center;
+  height: 1.5em;
+  overflow: hidden;
+}
+
+.anim-line-fx.is-collapsing {
+  animation: anim-panic-collapse 0.4s var(--ease) 0.6s forwards;
+}
+
+@keyframes anim-line-in {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.anim-line-fx__text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-6px);
+  animation: anim-line-in 0.22s var(--ease) forwards;
+}
+
+.anim-line-fx__text.is-glitch {
+  font-weight: 700;
+  color: var(--accent);
+  animation: anim-line-in 0.1s steps(1) forwards, anim-boot-glitch 0.4s steps(2) 2;
+}
+
+.anim-line-fx__text.is-glitch.is-danger {
+  color: var(--danger);
+  animation: anim-line-in 0.1s steps(1) forwards, anim-panic-glitch 0.4s steps(2) 2;
+}
+
+@keyframes anim-boot-glitch {
+  0% { text-shadow: 2px 0 var(--accent), -2px 0 #a78bfa; transform: translate(0, 0); }
+  25% { text-shadow: -3px 1px var(--accent), 3px -1px #a78bfa; transform: translate(-2px, 1px); }
+  50% { text-shadow: 3px -1px var(--accent), -3px 1px #a78bfa; transform: translate(2px, -1px); }
+  75% { text-shadow: -2px 0 var(--accent), 2px 0 #a78bfa; transform: translate(1px, 0); }
+  100% { text-shadow: none; transform: translate(0, 0); }
+}
+
+@keyframes anim-panic-glitch {
+  0% { text-shadow: 2px 0 #ff3b3b, -2px 0 #3b9bff; transform: translate(0, 0); }
+  25% { text-shadow: -3px 1px #ff3b3b, 3px -1px #3b9bff; transform: translate(-2px, 1px); }
+  50% { text-shadow: 3px -1px #ff3b3b, -3px 1px #3b9bff; transform: translate(2px, -1px); }
+  75% { text-shadow: -2px 0 #ff3b3b, 2px 0 #3b9bff; transform: translate(1px, 0); }
+  100% { text-shadow: none; transform: translate(0, 0); }
+}
+
+@keyframes anim-panic-collapse {
+  to { transform: scaleY(0.05); opacity: 0; }
+}

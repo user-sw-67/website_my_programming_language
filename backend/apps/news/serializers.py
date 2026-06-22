@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import PublicUserSerializer
 
 from .models import NewsPost
 
 
 class NewsPostSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
+    author = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = NewsPost

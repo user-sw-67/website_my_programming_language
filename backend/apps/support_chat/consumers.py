@@ -3,6 +3,7 @@ import json
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import AnonymousUser
+from django.utils import timezone
 
 from . import ai_bot
 from .models import ChatMessage, ChatSession
@@ -30,9 +31,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
+        # завершённые разговоры — только чтение через REST (история пользователя,
+        # вкладка «Завершённые» у сеньоров); по WebSocket в них больше нельзя
+        # заходить никому, даже автору
+        if session.status == ChatSession.Status.CLOSED:
+            await self.close()
+            return
+
         is_owner = session.user_id == user.id
         is_dev = await self._is_middle_plus(user)
         if not is_owner and not is_dev:
+            await self.close()
+            return
+
+        # в чат может подключиться только ОДИН разработчик — если сессию уже
+        # ведёт другой разработчик, второму вход запрещён (иначе его сообщения
+        # ошибочно помечались бы как сообщения пользователя, см. receive())
+        if is_dev and not is_owner and session.developer_id and session.developer_id != user.id:
             await self.close()
             return
 
@@ -60,11 +75,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
         msg_type = data.get('type', 'message')
         user = self.scope['user']
         session = await self._get_session()
-        if session is None:
+        if session is None or session.status == ChatSession.Status.CLOSED:
+            return
+
+        if msg_type == 'close_session':
+            is_owner = session.user_id == user.id
+            is_dev = await self._is_middle_plus(user)
+            if not is_owner and not is_dev:
+                return
+            if is_dev and not is_owner and session.developer_id and session.developer_id != user.id \
+                    and not await self._is_senior_plus(user):
+                return
+            session = await self._close_session(session)
+            who = 'пользователем' if is_owner else f'разработчиком {user.username}'
+            text = f'Разговор завершён {who}.'
+            msg = await self._save_message(session, ChatMessage.Sender.SYSTEM, text)
+            await self._broadcast(msg)
+            await self._notify_queue()
             return
 
         if msg_type == 'request_developer':
-            session = await self._set_status(session, ChatSession.Status.WAITING_DEVELOPER)
+            category = data.get('category')
+            valid_categories = {c for c, _ in ChatSession.Category.choices}
+            if category not in valid_categories:
+                category = ChatSession.Category.QUESTION
+            session = await self._set_waiting(session, category)
             text = 'Передаю обращение разработчику, оставайтесь на линии.'
             msg = await self._save_message(session, ChatMessage.Sender.SYSTEM, text)
             await self._broadcast(msg)
@@ -112,6 +147,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return user.is_middle_plus
 
     @database_sync_to_async
+    def _is_senior_plus(self, user):
+        return user.is_senior_plus
+
+    @database_sync_to_async
     def _level_label(self, user):
         labels = {'junior': 'Junior', 'middle': 'Middle', 'senior': 'Senior'}
         return labels.get(user.developer_level, 'Admin')
@@ -124,9 +163,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return session
 
     @database_sync_to_async
-    def _set_status(self, session, status):
-        session.status = status
-        session.save(update_fields=['status'])
+    def _close_session(self, session):
+        session.status = ChatSession.Status.CLOSED
+        session.closed_at = timezone.now()
+        session.save(update_fields=['status', 'closed_at'])
+        return session
+
+    @database_sync_to_async
+    def _set_waiting(self, session, category):
+        session.status = ChatSession.Status.WAITING_DEVELOPER
+        session.category = category
+        session.waiting_since = timezone.now()
+        session.save(update_fields=['status', 'category', 'waiting_since'])
         return session
 
     @database_sync_to_async
