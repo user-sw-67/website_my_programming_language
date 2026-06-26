@@ -11,3 +11,14 @@ export function avatarInitial(user) {
   const name = displayName(user);
   return name ? name.slice(0, 1).toUpperCase() : '?';
 }
+
+const LEVEL_LABEL = { junior: 'Junior', middle: 'Middle', senior: 'Senior' };
+
+/** Подпись для бейджа "разработчик" — конкретная роль/уровень вместо общего
+ * "Developer": Junior/Middle/Senior для разработчиков языка, Admin для
+ * администраторов (у них developer_level всегда null, см. User.save()). */
+export function developerRoleLabel(user) {
+  if (!user?.is_developer) return null;
+  if (user.role === 'admin') return 'Admin';
+  return LEVEL_LABEL[user.developer_level] || 'Developer';
+}

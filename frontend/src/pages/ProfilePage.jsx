@@ -5,7 +5,9 @@ import { useAuth } from '../auth/AuthContext.jsx';
 import { useConfirm } from '../ui/FeedbackContext.jsx';
 import ChatTranscript from '../components/ChatTranscript.jsx';
 import Avatar from '../components/Avatar.jsx';
+import StarRating from '../components/StarRating.jsx';
 import '../styles/profile.css';
+import '../styles/reactor.css';
 import '../styles/chat.css';
 import '../styles/admin.css';
 
@@ -141,7 +143,13 @@ export default function ProfilePage() {
   const [newIssue, setNewIssue] = useState({ title: '', description: '', severity: 'unclear' });
   const [creating, setCreating] = useState(false);
   const [projects, setProjects] = useState(null);
+  const [myPosts, setMyPosts] = useState(null);
   const confirm = useConfirm();
+
+  const ratedPosts = myPosts?.filter((p) => p.ratings_count > 0) || [];
+  const myAvgRating = ratedPosts.length
+    ? ratedPosts.reduce((sum, p) => sum + p.avg_rating, 0) / ratedPosts.length
+    : 0;
 
   useEffect(() => {
     if (user) {
@@ -166,6 +174,34 @@ export default function ProfilePage() {
         .catch(() => setProjects([]));
     }
   }, [tab, user]);
+
+  // грузим список постов сразу при заходе в профиль (не только когда открыта
+  // вкладка «Реактор») — иначе плашка рейтинга в карточке профиля не
+  // появлялась бы, пока вкладку не открыли хотя бы раз
+  useEffect(() => {
+    if (!user) return;
+    apiClient.get('/forum/topics/', { params: { mine: 'true', page_size: 100 } })
+      .then(({ data }) => setMyPosts(Array.isArray(data) ? data : data.results || []))
+      .catch(() => setMyPosts([]));
+  }, [user]);
+
+  const toggleHidden = async (post) => {
+    try {
+      const { data } = await apiClient.patch(`/forum/topics/${post.slug}/`, { is_hidden: !post.is_hidden });
+      setMyPosts((list) => list.map((p) => (p.id === post.id ? { ...p, is_hidden: data.is_hidden } : p)));
+    } catch {
+      setSaveStatus({ ok: false, text: 'Не удалось изменить видимость поста.' });
+    }
+  };
+
+  const toggleResolved = async (post) => {
+    try {
+      const { data } = await apiClient.patch(`/forum/topics/${post.slug}/`, { is_resolved: !post.is_resolved });
+      setMyPosts((list) => list.map((p) => (p.id === post.id ? { ...p, is_resolved: data.is_resolved } : p)));
+    } catch {
+      setSaveStatus({ ok: false, text: 'Не удалось изменить статус решения.' });
+    }
+  };
 
   const deleteProject = async (id) => {
     const ok = await confirm({
@@ -253,6 +289,12 @@ export default function ProfilePage() {
             {user.developer_key}
           </div>
         )}
+        {myPosts !== null && myPosts.length > 0 && (
+          <div className="profile-card__reactor-rating" title="Средняя оценка ваших постов в Реакторе">
+            <StarRating value={myAvgRating} count={ratedPosts.length} size={14} />
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>· {myPosts.length} постов</span>
+          </div>
+        )}
         <button className="profile-card__logout" onClick={logout}>Выйти из аккаунта</button>
       </div>
 
@@ -266,6 +308,9 @@ export default function ProfilePage() {
           </div>
           <div className={`profile-tab ${tab === 'projects' ? 'active' : ''}`} onClick={() => setTab('projects')}>
             Мои проекты
+          </div>
+          <div className={`profile-tab ${tab === 'reactor' ? 'active' : ''}`} onClick={() => setTab('reactor')}>
+            Мои посты
           </div>
           <div className={`profile-tab ${tab === 'support' ? 'active' : ''}`} onClick={() => setTab('support')}>
             Поддержка
@@ -407,6 +452,40 @@ export default function ProfilePage() {
                     onClick={() => deleteProject(p.id)}
                   >
                     Удалить
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === 'reactor' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.75rem' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0 }}>
+                Скрытые посты видны только вам, но всё равно учитываются в вашем рейтинге.
+              </p>
+              <Link to="/forum/create" className="btn btn-primary" style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem', whiteSpace: 'nowrap' }}>
+                + Создать пост
+              </Link>
+            </div>
+            {myPosts === null && <p style={{ color: 'var(--text-secondary)' }}>Загрузка…</p>}
+            {myPosts && myPosts.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>У вас пока нет постов в Реакторе.</p>}
+            {myPosts && myPosts.map((p) => (
+              <div key={p.id} className="my-issue-row">
+                <div>
+                  <Link to={`/forum/${p.slug}`} style={{ color: 'inherit', fontWeight: 600 }}>{p.title}</Link>
+                  {p.is_resolved && <span className="badge badge--solved" style={{ marginLeft: '0.5rem' }}>решено</span>}
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    <StarRating value={p.avg_rating || 0} count={p.ratings_count} size={11} /> · {p.comments_count ?? 0} комментариев
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }} onClick={() => toggleResolved(p)}>
+                    {p.is_resolved ? 'Снять отметку' : 'Отметить решённым'}
+                  </button>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem' }} onClick={() => toggleHidden(p)}>
+                    {p.is_hidden ? 'Показать всем' : 'Скрыть'}
                   </button>
                 </div>
               </div>

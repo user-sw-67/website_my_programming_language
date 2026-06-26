@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext.jsx';
 import ChatPanel from '../components/ChatPanel.jsx';
 import ChatTranscript from '../components/ChatTranscript.jsx';
 import Avatar from '../components/Avatar.jsx';
+import ReactorWordmark from '../components/ReactorWordmark.jsx';
 import { displayName } from '../utils/userDisplay.js';
 import { useToast } from '../ui/FeedbackContext.jsx';
 import '../styles/admin.css';
@@ -27,13 +28,13 @@ const ROLE_HINT = {
 const OVERVIEW_CARDS = [
   { key: 'users_total', label: 'Пользователей всего', hint: 'Все зарегистрированные аккаунты на платформе: участники, разработчики и администраторы вместе.' },
   { key: 'projects_total', label: 'Проектов пользователей', hint: 'Количество проектов, созданных в редакторе авторизованными пользователями (включая пустые и черновики).' },
-  { key: 'forum_topics_total', label: 'Тем на форуме', hint: 'Все темы в разделе «Сообщество», когда-либо созданные пользователями, независимо от статуса решения.' },
+  { key: 'forum_topics_total', label: <>Постов в <ReactorWordmark variant="plain" /></>, hint: 'Все посты в разделе «Реактор», когда-либо созданные пользователями, независимо от статуса решения.' },
   { key: 'news_total', label: 'Новостей опубликовано', hint: 'Сколько новостей команда выпустила за всё время — все опубликованные посты в разделе «Новости».' },
 ];
 
 const ATTENTION_CARDS = [
   { key: 'feedback_unanswered', label: 'Отзывов без ответа', tone: 'warn', hint: 'Отзывы и предложения пользователей, на которые пока не ответил ни один разработчик. Ответить может джуниор и выше.' },
-  { key: 'forum_topics_unresolved', label: 'Нерешённых тем форума', tone: 'warn', hint: 'Темы на форуме, которые автор или модератор ещё не отметил как решённые — потенциально требуют внимания.' },
+  { key: 'forum_topics_unresolved', label: <>Нерешённых постов в <ReactorWordmark variant="plain" /></>, tone: 'warn', hint: 'Посты в Реакторе, которые автор ещё не отметил как решённые — потенциально требуют внимания.' },
   { key: 'issues_open', label: 'Открытых проблем', tone: 'danger', hint: 'Баги и проблемы со статусом «Открыта» в разделе «Проблемы» — ещё не исправлены и не закрыты.' },
   { key: 'support_sessions_waiting', label: 'Ждут разработчика в поддержке', tone: 'danger', hint: 'Обращения в чат поддержки, которые пользователь передал разработчику, но никто пока не взял в работу.' },
 ];
@@ -367,7 +368,11 @@ function NewsTab() {
   );
 }
 
-function TeamTab({ developers, onChanged }) {
+/** Подраздел 1 — регистрация нового разработчика (повышение участника
+ * сообщества). Поиск по имени/email через /auth/members/, своё локальное
+ * состояние формы — не пересекается со сменой уровня уже действующих
+ * разработчиков (это отдельный подраздел, см. DeveloperSearchSubtab). */
+function AddDeveloperSubtab({ onChanged }) {
   const [query, setQuery] = useState('');
   const [matches, setMatches] = useState([]);
   const [searched, setSearched] = useState(false);
@@ -376,18 +381,6 @@ function TeamTab({ developers, onChanged }) {
   const [status, setStatus] = useState(null);
   const [busy, setBusy] = useState(false);
   const searchTimer = useRef(null);
-
-  const changeLevel = async (key, level) => {
-    setBusy(true);
-    try {
-      await apiClient.patch(`/auth/developers/${key}/level/`, { developer_level: level });
-      onChanged();
-    } catch {
-      setStatus({ ok: false, text: 'Не удалось сменить уровень.' });
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const onQueryChange = (value) => {
     setQuery(value);
@@ -434,59 +427,94 @@ function TeamTab({ developers, onChanged }) {
   };
 
   return (
-    <div>
-      <form onSubmit={promote} className="card" style={{ marginBottom: '1.25rem' }}>
-        <h3 style={{ marginTop: 0 }}>Зарегистрировать разработчика</h3>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-          Найдите уже зарегистрированного участника сообщества по имени или email и повысьте его до разработчика языка.
-        </p>
-        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div className="member-search" style={{ flex: 1, minWidth: 220, position: 'relative' }}>
-            <input
-              type="text"
-              required
-              placeholder="имя пользователя или email…"
-              value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-              onBlur={() => setTimeout(() => setMatches([]), 150)}
-              autoComplete="off"
-            />
-            {(matches.length > 0 || (searched && query.trim().length >= 2 && !picked)) && (
-              <div className="member-search__dropdown">
-                {matches.length === 0 ? (
-                  <div className="member-search__empty">Совпадений не найдено</div>
-                ) : (
-                  matches.map((m) => (
-                    <button
-                      type="button"
-                      key={m.id}
-                      className="member-search__option"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => pick(m)}
-                    >
+    <form onSubmit={promote} className="card">
+      <h3 style={{ marginTop: 0 }}>Зарегистрировать разработчика</h3>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+        Найдите уже зарегистрированного участника сообщества по имени или email и повысьте его до разработчика языка.
+      </p>
+      <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="member-search" style={{ flex: 1, minWidth: 220, position: 'relative' }}>
+          <input
+            type="text"
+            required
+            placeholder="имя пользователя или email…"
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            onBlur={() => setTimeout(() => setMatches([]), 150)}
+            autoComplete="off"
+          />
+          {(matches.length > 0 || (searched && query.trim().length >= 2 && !picked)) && (
+            <div className="member-search__dropdown">
+              {matches.length === 0 ? (
+                <div className="member-search__empty">Совпадений не найдено</div>
+              ) : (
+                matches.map((m) => (
+                  <button
+                    type="button"
+                    key={m.id}
+                    className="member-search__option"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => pick(m)}
+                  >
+                    <Avatar user={m} size={26} />
+                    <div className="member-search__option-text">
                       <strong>{displayName(m)}</strong>
                       <span>@{m.username}</span>
-                    </button>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-          <select value={promoteLevel} onChange={(e) => setPromoteLevel(e.target.value)}>
-            {Object.entries(LEVEL_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-          </select>
-          <button className="btn btn-primary" disabled={busy || !picked}>Повысить</button>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
         </div>
-        {status && (
-          <p style={{ marginTop: '0.6rem', color: status.ok ? 'var(--accent)' : 'var(--danger)', fontSize: '0.85rem' }}>
-            {status.text}
-          </p>
-        )}
-      </form>
+        <select value={promoteLevel} onChange={(e) => setPromoteLevel(e.target.value)}>
+          {Object.entries(LEVEL_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+        <button className="btn btn-primary" disabled={busy || !picked}>Повысить</button>
+      </div>
+      {status && (
+        <p style={{ marginTop: '0.6rem', color: status.ok ? 'var(--accent)' : 'var(--danger)', fontSize: '0.85rem' }}>
+          {status.text}
+        </p>
+      )}
+    </form>
+  );
+}
 
-      <div className="admin-stats-section__title">действующие разработчики</div>
+/** Подраздел 2 — поиск среди уже действующих разработчиков по логину, имени
+ * или уникальному developer_key, со сменой уровня прямо в карточке найденного
+ * (фильтрация клиентская — список разработчиков на сайте небольшой, грузится
+ * один раз в AdminPage, лишние запросы к серверу не нужны). */
+function DeveloperSearchSubtab({ developers, busy, onChangeLevel }) {
+  const [query, setQuery] = useState('');
+  const q = query.trim().toLowerCase();
+  const filtered = !developers ? null : (
+    !q ? developers : developers.filter((d) => (
+      d.username.toLowerCase().includes(q)
+      || (d.display_name || '').toLowerCase().includes(q)
+      || (d.developer_key || '').toLowerCase().includes(q)
+    ))
+  );
+
+  return (
+    <div>
+      <div className="profile-field" style={{ maxWidth: 420, marginBottom: '1.1rem' }}>
+        <label>Поиск по логину, имени или ключу разработчика</label>
+        <input
+          type="text"
+          placeholder="ATM-XXXXXXXX, имя или @логин…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          autoComplete="off"
+        />
+      </div>
+
+      {filtered === null && <p style={{ color: 'var(--text-secondary)' }}>Загрузка…</p>}
+      {filtered && filtered.length === 0 && (
+        <p style={{ color: 'var(--text-secondary)' }}>Никого не нашли по этому запросу.</p>
+      )}
       <div className="card-grid">
-        {developers && developers.map((d) => (
+        {filtered && filtered.map((d) => (
           <div key={d.id} className="card team-dev-card">
             <Avatar user={d} size={32} />
             <strong>{displayName(d)}</strong>
@@ -494,13 +522,57 @@ function TeamTab({ developers, onChanged }) {
             <select
               value={d.developer_level || 'junior'}
               disabled={busy}
-              onChange={(e) => changeLevel(d.developer_key, e.target.value)}
+              onChange={(e) => onChangeLevel(d.developer_key, e.target.value)}
             >
               {Object.entries(LEVEL_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function TeamTab({ developers, onChanged }) {
+  const [subtab, setSubtab] = useState('add'); // 'add' | 'search'
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState(null);
+
+  const changeLevel = async (key, level) => {
+    setBusy(true);
+    setStatus(null);
+    try {
+      await apiClient.patch(`/auth/developers/${key}/level/`, { developer_level: level });
+      onChanged();
+    } catch {
+      setStatus({ ok: false, text: 'Не удалось сменить уровень.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="profile-tabs" style={{ marginBottom: '1.1rem' }}>
+        <div className={`profile-tab ${subtab === 'add' ? 'active' : ''}`} onClick={() => setSubtab('add')}>
+          Добавить разработчика
+        </div>
+        <div className={`profile-tab ${subtab === 'search' ? 'active' : ''}`} onClick={() => setSubtab('search')}>
+          Поиск разработчиков
+        </div>
+      </div>
+
+      {subtab === 'add' && <AddDeveloperSubtab onChanged={onChanged} />}
+      {subtab === 'search' && (
+        <>
+          <DeveloperSearchSubtab developers={developers} busy={busy} onChangeLevel={changeLevel} />
+          {status && (
+            <p style={{ marginTop: '0.6rem', color: status.ok ? 'var(--accent)' : 'var(--danger)', fontSize: '0.85rem' }}>
+              {status.text}
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }

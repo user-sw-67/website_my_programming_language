@@ -46,7 +46,7 @@ const FEATURES = [
   },
   {
     to: '/forum',
-    title: 'Форум сообщества',
+    title: 'Реактор',
     text: 'Вопросы и ответы в стиле StackOverflow, обмен опытом между разработчиками на ATOM.',
   },
   {

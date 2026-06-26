@@ -1,0 +1,36 @@
+/* === лого «Реактор» === */
+.reactor-wordmark {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.reactor-wordmark--decorated {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.06em;
+}
+
+.reactor-wordmark--decorated .reactor-wordmark__prefix {
+  color: var(--accent);
+  opacity: 0.8;
+  margin-right: 0.25em;
+  font-size: 0.75em;
+}
+
+.reactor-wordmark--decorated .reactor-wordmark__neon {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--accent);
+  text-shadow: 0 0 10px var(--glow), 0 0 2px var(--accent);
+}
+
+.reactor-wordmark__atom {
+  color: var(--accent);
+  margin: 0 0.04em;
+  filter: drop-shadow(0 0 6px var(--accent-edge));
+  animation: reactor-wordmark-spin 4s linear infinite;
+}
+
+@keyframes reactor-wordmark-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

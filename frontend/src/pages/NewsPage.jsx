@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../api/client.js';
+import Pagination from '../components/Pagination.jsx';
 import { useMediaQuery } from '../hooks/useMediaQuery.js';
 import { displayName } from '../utils/userDisplay.js';
 import '../styles/news.css';
@@ -375,17 +376,7 @@ export default function NewsPage() {
         })}
       </div>
 
-      {totalPages > 1 && (
-        <div className="news-pagination">
-          <button className="btn btn-secondary" disabled={page <= 1} onClick={() => setPage(1)} title="Первая страница">«</button>
-          <button className="btn btn-secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>← Назад</button>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
-            Страница {page} из {totalPages}
-          </span>
-          <button className="btn btn-secondary" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>Вперёд →</button>
-          <button className="btn btn-secondary" disabled={page >= totalPages} onClick={() => setPage(totalPages)} title="Последняя страница">»</button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   );
 }

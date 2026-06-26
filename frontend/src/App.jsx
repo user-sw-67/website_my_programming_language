@@ -7,8 +7,9 @@ import EditorPage from './pages/EditorPage.jsx';
 import DocsPage from './pages/DocsPage.jsx';
 import ApiPage from './pages/ApiPage.jsx';
 import LearnPage from './pages/LearnPage.jsx';
-import ForumPage from './pages/ForumPage.jsx';
-import ForumTopicPage from './pages/ForumTopicPage.jsx';
+import ReactorPage from './pages/ReactorPage.jsx';
+import ReactorPostPage from './pages/ReactorPostPage.jsx';
+import ReactorCreatePage from './pages/ReactorCreatePage.jsx';
 import RepositoriesPage from './pages/RepositoriesPage.jsx';
 import IssuesPage from './pages/IssuesPage.jsx';
 import ReviewsPage from './pages/ReviewsPage.jsx';
@@ -46,8 +47,9 @@ export default function App() {
             {/* не /api-... — vite.config.js проксирует любой путь с префиксом /api прямо в Django (минуя React Router) */}
             <Route path="/rest-api" element={<ApiPage />} />
             <Route path="/learn" element={<LearnPage />} />
-            <Route path="/forum" element={<ForumPage />} />
-            <Route path="/forum/:id" element={<ForumTopicPage />} />
+            <Route path="/forum" element={<ReactorPage />} />
+            <Route path="/forum/create" element={<ReactorCreatePage />} />
+            <Route path="/forum/:slug" element={<ReactorPostPage />} />
             <Route path="/repositories" element={<RepositoriesPage />} />
             <Route path="/issues" element={<IssuesPage />} />
             <Route path="/reviews" element={<ReviewsPage />} />

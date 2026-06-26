@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle.jsx';
+import ReactorWordmark from './ReactorWordmark.jsx';
 import AuthModal from './AuthModal.jsx';
 import Avatar from './Avatar.jsx';
 import { LoginBootAnimation, LogoutCrashAnimation } from './TerminalFx.jsx';
@@ -32,7 +33,7 @@ const EXPLORE_GROUP = {
 const COMMUNITY_GROUP = {
   label: 'Сообщество',
   links: [
-    { to: '/forum', label: 'Сообщество' },
+    { to: '/forum', label: <ReactorWordmark variant="plain" /> },
     { to: '/repositories', label: 'Проекты' },
     { to: '/reviews', label: 'Отзывы' },
   ],
